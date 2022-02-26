@@ -59,7 +59,7 @@ export default class Rom extends Reader {
 
         for (let i = 0; i < dmaData.length - 1; i++) {
             const current = dmaData[i];
-            const next = dmaData[i +1];
+            const next = dmaData[i + 1];
             if (current.end > next.start) {
                 throw new Error("Overlapping DMA data records!");
             }

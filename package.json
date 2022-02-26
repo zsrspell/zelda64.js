@@ -15,7 +15,7 @@
     "patching"
   ],
   "author": "c0hesion",
-  "license": "GPL-v3.0",
+  "license": "GPL-3.0",
   "devDependencies": {
     "@types/node": "^17.0.21",
     "@types/pako": "^1.0.3",

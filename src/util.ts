@@ -1,3 +1,14 @@
+export function swap32(value: number) {
+    return ((value & 0x000000FF) << 24
+        | (value & 0x0000FF00) << 8
+        | (value & 0x00FF0000) >>> 8
+        | (value & 0xFF000000) >>> 24)
+}
+
+export function swap16(value: number) {
+    return ((value & 0x00FF) << 8 | (value & 0xFF00) >>> 8);
+}
+
 class SeekableBuffer {
     protected _buffer: ArrayBuffer;
     protected _view: DataView;
@@ -63,11 +74,11 @@ export class Reader extends SeekableBuffer {
         return (a << 8) + b;
     }
 
-    public readUint32(offset?: number) {
+    public readUint32(offset?: number, littleEndian?: boolean) {
         if (offset !== undefined) {
-            return this._view.getUint32(offset);
+            return this._view.getUint32(offset, littleEndian);
         } else {
-            const val = this._view.getUint32(this._cursor);
+            const val = this._view.getUint32(this._cursor, littleEndian);
             this._cursor += 4;
             return val;
         }
@@ -89,23 +100,28 @@ export class Writer extends SeekableBuffer {
         super(buffer);
     }
 
-    public writeUint32(value: number, offset?: number) {
+    public writeUint32(value: number, offset?: number, littleEndian?: boolean) {
         if (offset !== undefined) {
-            this._view.setUint32(offset, value);
+            this._view.setUint32(offset, value, littleEndian);
         } else {
-            this._view.setUint32(this._cursor, value);
+            this._view.setUint32(this._cursor, value, littleEndian);
             this._cursor += 4;
         }
     }
 
-    public writeBytes(data: ArrayBuffer, offset?: number) {
+    public writeBytes(data: ArrayBuffer, offset?: number, size?: number) {
         const array = new Uint8Array(data);
         const start = (offset !== undefined) ? offset : this._cursor;
+        const length = (size !== undefined) ? size : data.byteLength;
 
         let written = 0;
-        for (let i = 0; i < data.byteLength; i++) {
+        for (let i = 0; i < length; i++) {
             this._view.setUint8(start + i, array[i]);
             written++;
+        }
+
+        if (written !== length) {
+            throw new Error("did not copy all bytes");
         }
 
         if (offset === undefined) this._cursor += written;

@@ -16,7 +16,7 @@ const DMA_UPDATE_TABLE_START = 21;
 /**
  * ZPF Patcher Class
  */
-export class Patcher {
+export default class Patcher {
     /**
      * The ArrayBuffer holding the uncompressed ZPF file's data.
      */
