@@ -107,8 +107,11 @@ export default class Rom extends Reader {
      * @returns RomType specifying the type of data in the ROM.
      */
     public validateRom(): RomType {
-        const checksum = new Uint8Array(this._buffer, CRC_OFFSET, 8);
+        if (this._buffer.byteLength !== COMPRESSED_ROM_SIZE && this._buffer.byteLength !== DECOMPRESSED_ROM_SIZE) {
+            throw new Error("ROM size is too large or too small; not a valid ROM");
+        }
 
+        const checksum = new Uint8Array(this._buffer, CRC_OFFSET, 8);
         const equals = (v: number, i: number) => checksum[i] === v;
 
         if (crc.compressed.every(equals)) {
@@ -119,7 +122,7 @@ export default class Rom extends Reader {
             return RomType.DECOMPRESSED;
         }
 
-        throw new Error("Not a valid ROM.");
+        throw new Error("ROM failed CRC checksum validation; not a valid ROM");
     }
 
     /**
