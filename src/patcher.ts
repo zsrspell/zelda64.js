@@ -78,8 +78,8 @@ export default class Patcher {
 
             if (fromFile !== 0xFFFFFFFF) {
                 // Copy source file from source ROM
-                const record = rom.getDmaRecordByKey(fromFile);
-                const copySize = (size < record.size) ? size : record.size;
+                const record = rom.readDmaRecordByKey(fromFile);
+                const copySize = (size < record.physicalStart) ? size : record.physicalStart;
                 dest.writeBytes(rom.readBytes(copySize, fromFile), start);
                 dest.fill(0, size - copySize, start + copySize);
             } else {

@@ -10,7 +10,6 @@ if (process.argv.length < 4) {
 const romFilename = process.argv[2];
 const patchFilename = process.argv[3];
 
-// Open the patch file.
 fs.readFile(patchFilename, null, ((err, patchData) => {
     fs.readFile(romFilename, null, ((err, romData) => {
         console.log(`Inflating ROM '${romFilename}'`);
@@ -25,19 +24,17 @@ fs.readFile(patchFilename, null, ((err, patchData) => {
             }
         });
 
-        console.log(`Applying patch '${patchFilename}' to decompressed ROM.`);
+        console.log(`Applying patch '${patchFilename}' to decompressed ROM`);
         const patcher = new Patcher(patchData.buffer);
         const patchedRomData = patcher.patch(decompData);
-        const patchedRom = new Rom(patchedRomData);
-        patchedRom.verifyDmaData();
-        console.log("Patching successful!");
+        console.log("Successfully patched ROM");
 
         fs.writeFile("TriforceBlitz.uncompressed.z64", Buffer.from(patchedRomData), "binary", (err) => {
             if (err !== null) {
                 console.error(err);
             } else {
-                console.log("Successfully patched ROM! Enjoy.");
+                console.log(`Saving patched ROM to 'TriforceBlitz.uncompressed.z64'`);
             }
-        })
+        });
     }));
 }));
