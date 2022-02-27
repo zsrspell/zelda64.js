@@ -2,6 +2,7 @@ import * as pako from "pako";
 import {TextDecoder} from "util";
 import {Reader, Writer} from "./util";
 import Rom, {DMA_RECORD_SIZE, DmaRecord} from "./rom";
+import {N64Crc} from "./crc";
 
 interface PatchConfiguration {
     dmaOffset: number;
@@ -65,6 +66,8 @@ export default class Patcher {
 
         this._updateDmaTable(patchReader, destWriter, rom);
         this._patchDataBlocks(patchReader, destWriter, rom);
+        new N64Crc(destBuffer).recalculate();
+
         return destBuffer;
     }
 

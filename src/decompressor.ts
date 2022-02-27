@@ -1,5 +1,6 @@
 import {Writer} from "./util";
 import Rom, {DECOMPRESSED_ROM_SIZE, DMA_INFO_RECORD_INDEX, DMA_RECORD_SIZE, DmaRecord} from "./rom";
+import {N64Crc} from "./crc";
 
 /**
  * The Decompressor class implements the algorithm for inflating a Nintendo 64 Zelda ROM.
@@ -69,6 +70,7 @@ export default class Decompressor {
             this._writeDmaRecord(out, i, record);
         }
 
+        new N64Crc(outBuffer).recalculate();
         return outBuffer;
     }
 

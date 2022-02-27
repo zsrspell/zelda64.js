@@ -19,12 +19,6 @@ export enum RomType {
     DECOMPRESSED,
 }
 
-const crc = {
-    compressed: [0xEC, 0x70, 0x11, 0xB7, 0x76, 0x16, 0xD7, 0x2B],
-    bigEndianCompressed: [0x70, 0xEC, 0xB7, 0x11, 0x16, 0x76, 0x2B, 0xD7],
-    decompressed: [0x93, 0x52, 0x2E, 0x7B, 0xE5, 0x06, 0xD4, 0x27],
-}
-
 /**
  * The Rom class provides a read only wrapper around an input ROM, providing a few convenience features to read data
  * from the file with ease.
@@ -57,18 +51,9 @@ export default class Rom extends Reader {
     /**
      * Constructs a Rom instance.
      * @param buffer Instance of ArrayBuffer containing the input ROM.
-     * @param fixEndianness If set to true, will byte swap a Big Endian ROM to little endianness.
-     *                      This is a write operation to the input buffer.
      */
-    public constructor(buffer: ArrayBuffer, fixEndianness?: boolean) {
+    public constructor(buffer: ArrayBuffer) {
         super(buffer);
-        this._type = this.validateRom();
-        if (this._type === RomType.BIG_ENDIAN_COMPRESSED && fixEndianness === true) {
-            this._fixEndianness();
-            this._type = RomType.COMPRESSED;
-        }
-
-        // Find the location of the DMA table and load information about its size.
         this._dmaOffset = this._findDmaTableOffset();
         const info = this.readDmaRecord(DMA_INFO_RECORD_INDEX);
         this._dmaSize = info.virtualEnd - info.virtualStart;
@@ -100,29 +85,6 @@ export default class Rom extends Reader {
         }
 
         throw new Error("no DMA table found");
-    }
-
-    /**
-     * Validates the CRC checksum of the ROM and returns the type of the ROM.
-     * @returns RomType specifying the type of data in the ROM.
-     */
-    public validateRom(): RomType {
-        if (this._buffer.byteLength !== COMPRESSED_ROM_SIZE && this._buffer.byteLength !== DECOMPRESSED_ROM_SIZE) {
-            throw new Error("ROM size is too large or too small; not a valid ROM");
-        }
-
-        const checksum = new Uint8Array(this._buffer, CRC_OFFSET, 8);
-        const equals = (v: number, i: number) => checksum[i] === v;
-
-        if (crc.compressed.every(equals)) {
-            return RomType.COMPRESSED;
-        } else if (crc.bigEndianCompressed.every(equals)) {
-            return RomType.BIG_ENDIAN_COMPRESSED;
-        } else if (crc.decompressed.every(equals)) {
-            return RomType.DECOMPRESSED;
-        }
-
-        throw new Error("ROM failed CRC checksum validation; not a valid ROM");
     }
 
     /**
