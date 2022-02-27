@@ -1,3 +1,7 @@
+/**
+ * Byte swaps the endianness of a 32-bit integer.
+ * @param value The 32-bit integer to swap.
+ */
 export function swap32(value: number) {
     return ((value & 0x000000FF) << 24
         | (value & 0x0000FF00) << 8
@@ -5,22 +9,42 @@ export function swap32(value: number) {
         | (value & 0xFF000000) >>> 24)
 }
 
+/**
+ * Byte swaps the endianness of a 16-bit integer.
+ * @param value The 16-bit integer to swap.
+ */
 export function swap16(value: number) {
     return ((value & 0x00FF) << 8 | (value & 0xFF00) >>> 8);
 }
 
+/**
+ * SeekableBuffer implements a wrapper over ArrayBuffer that implements seeking capabilities for sequential read/writes.
+ */
 class SeekableBuffer {
     protected _buffer: ArrayBuffer;
     protected _view: DataView;
     protected _cursor: number;
 
+    /**
+     * Constructs instance of SeekableBuffer.
+     * @param buffer The ArrayBuffer to operate on.
+     */
     public constructor(buffer: ArrayBuffer) {
         this._buffer = buffer;
         this._view = new DataView(this._buffer);
         this._cursor = 0;
     }
 
-    public seek(pos: number, whence: "begin" | "current" | "end" = "current") {
+    /**
+     * Moves the cursor to a position on the buffer.
+     * @param pos The amount of places to move the cursor relative to the whence argument.
+     * @param whence Specifies the relation of where the cursor moves. "begin" moves it from the beginning of the
+     *               buffer, "current" moves it relative to the cursor's current position, and "end" moves it relative
+     *               to the end of the buffer. Defaults to "current".
+     * @returns The old position of the cursor.
+     */
+    public seek(pos: number, whence: "begin" | "current" | "end" = "current"): number {
+        const oldPos = this._cursor;
         switch (whence) {
             case "begin":
                 this._cursor = pos;
@@ -34,13 +58,21 @@ class SeekableBuffer {
                 this._cursor = this._buffer.byteLength + pos;
                 break;
         }
+        return oldPos;
     }
 
+    /**
+     * Checks whether the cursor has passed the end of the buffer.
+     * @returns true if the end of buffer is reached, false if not.
+     */
     public eof() {
         return this._cursor >= this._buffer.byteLength;
     }
 }
 
+/**
+ * Reader implements sequential read operations on an ArrayBuffer.
+ */
 export class Reader extends SeekableBuffer {
     public constructor(buffer: ArrayBuffer) {
         super(buffer);
@@ -95,6 +127,9 @@ export class Reader extends SeekableBuffer {
     }
 }
 
+/**
+ * Writer implements sequential write operations on an ArrayBuffer.
+ */
 export class Writer extends SeekableBuffer {
     public constructor(buffer: ArrayBuffer) {
         super(buffer);
