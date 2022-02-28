@@ -12,7 +12,7 @@ enum Operation {
 /**
  * The Compressor class implements functionality for compressing Nintendo 64 Zelda ROMs.
  */
-export class Compressor {
+export default class Compressor {
     private readonly _buffer: ArrayBuffer;
     private readonly _in: Rom;
     private readonly _ops: Uint16Array;

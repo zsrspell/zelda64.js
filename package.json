@@ -2,7 +2,8 @@
   "name": "zelda64",
   "version": "1.0.0",
   "description": "Zelda64.js is a library that can compress, decompress and patch Nintendo 64 Zelda game ROMs.",
-  "main": "src/index.ts",
+  "main": "dist/index.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,6 +17,9 @@
   ],
   "author": "c0hesion",
   "license": "GPL-3.0",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@types/node": "^17.0.21",
     "@types/pako": "^1.0.3",

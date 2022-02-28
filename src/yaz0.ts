@@ -126,7 +126,7 @@ export class Yaz0Compressor {
 
         let hash = parse32(this._src, srcPos);
         hash = hash >>> 8
-        let currentHash = u32(parse32(this._src, startPosition));
+        let currentHash = parse32(this._src, startPosition);
         currentHash = currentHash >>> 8;
 
         let bestSize = 0, bestPosition = 0;
