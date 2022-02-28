@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-import {Reader} from "./util";
+import {Reader, u32} from "./util";
 
 const N64_HEADER_SIZE = 0x40;
 const N64_BOOT_CODE_SIZE = (0x1000 - N64_HEADER_SIZE);
@@ -32,18 +32,6 @@ const CHECKSUM_CIC6102 = 0xF8CA4DDC;
 const CHECKSUM_CIC6103 = 0xA3886759;
 const CHECKSUM_CIC6105 = 0xDF26F436;
 const CHECKSUM_CIC6106 = 0x1FEA617A;
-
-const UINT32_MASK = 0xFFFFFFFF;
-
-/**
- * This function exists to pwn JavaScript's untyped 64-bit signed integers to 32-bit unsigned GIGACHAD integers.
- * @param value Weak virgin 64-bit signed integer.
- * @returns Strong GIGACHAD 32-bit unsigned integer.
- */
-function u32(value: number) {
-    // fuck untyped languages
-    return (value & UINT32_MASK) >>> 0;
-}
 
 function rol(a: number, b: number) {
     return ((a) << (b)) | ((a) >>> (32 - (b)));

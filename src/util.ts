@@ -17,6 +17,23 @@ export function swap16(value: number) {
     return ((value & 0x00FF) << 8 | (value & 0xFF00) >>> 8);
 }
 
+export function parse32(src: Uint8Array, offset: number) {
+    return ((src[offset] << 24)
+        | (src[offset + 1] << 16)
+        | (src[offset + 2] << 8)
+        | src[offset +3]);
+}
+
+/**
+ * This function exists to pwn JavaScript's untyped 64-bit signed integers to 32-bit unsigned GIGACHAD integers.
+ * @param value Weak virgin 64-bit signed integer.
+ * @returns Strong GIGACHAD 32-bit unsigned integer.
+ */
+export function u32(value: number) {
+    // fuck untyped languages
+    return (value & 0xFFFFFFFF) >>> 0;
+}
+
 /**
  * SeekableBuffer implements a wrapper over ArrayBuffer that implements seeking capabilities for sequential read/writes.
  */
@@ -104,6 +121,16 @@ export class Reader extends SeekableBuffer {
         const b = this._view.getUint8(pos + 2);
         if (offset === undefined) this._cursor += 3;
         return (a << 8) + b;
+    }
+
+    public readInt32(offset?: number, littleEndian?: boolean) {
+        if (offset !== undefined) {
+            return this._view.getInt32(offset, littleEndian);
+        } else {
+            const val = this._view.getInt32(this._cursor, littleEndian);
+            this._cursor += 4;
+            return val;
+        }
     }
 
     public readUint32(offset?: number, littleEndian?: boolean) {

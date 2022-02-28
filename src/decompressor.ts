@@ -41,6 +41,9 @@ export default class Decompressor {
     public inflate() {
         const info = this._in.readDmaRecord(DMA_INFO_RECORD_INDEX);
 
+        // Keep track of which files are already decompressed, so that we skip these in the compression step.
+        const exclusions: number[] = [];
+
         // Allocate a new buffer and copy the original ROM into it. Null everything past the DMA table.
         const outBuffer = new ArrayBuffer(DECOMPRESSED_ROM_SIZE);
         const out = new Writer(outBuffer);
@@ -58,6 +61,7 @@ export default class Decompressor {
 
             // Check if the record is already decompressed, if not, decompress it.
             if (record.physicalEnd === 0) {
+                exclusions.push(i);
                 out.writeBytes(this._in.readBytes(size, record.physicalStart), record.virtualStart, size);
             } else {
                 const source = new Uint8Array(this._buffer, record.physicalStart + 0x10);
@@ -71,7 +75,11 @@ export default class Decompressor {
         }
 
         new N64Crc(outBuffer).recalculate();
-        return outBuffer;
+
+        return {
+            data: outBuffer,
+            exclusions: exclusions,
+        };
     }
 
     /**

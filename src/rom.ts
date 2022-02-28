@@ -158,4 +158,8 @@ export default class Rom extends Reader {
     public get dmaCount() {
         return this._dmaCount;
     }
+
+    public get dmaSize() {
+        return this._dmaSize;
+    }
 }

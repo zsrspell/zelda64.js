@@ -115,7 +115,7 @@ export default class Patcher {
             const start = patch.readUint32();
             const size = patch.readUint24();
 
-            this._writeDmaRecord(dst, dmaIndex,{
+            this._writeDmaRecord(dst, dmaIndex, {
                 virtualStart: start,
                 virtualEnd: start + size,
                 physicalStart: start,
