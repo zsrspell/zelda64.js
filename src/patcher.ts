@@ -1,5 +1,4 @@
 import * as pako from "pako";
-import {TextDecoder} from "util";
 import {Reader, Writer} from "./util";
 import Rom, {DMA_RECORD_SIZE, DmaRecord} from "./rom";
 import {N64Crc} from "./crc";
@@ -115,7 +114,7 @@ export default class Patcher {
             const start = patch.readUint32();
             const size = patch.readUint24();
 
-            this._writeDmaRecord(dst, dmaIndex, {
+            rom.writeDmaRecord(dst, dmaIndex, {
                 virtualStart: start,
                 virtualEnd: start + size,
                 physicalStart: start,
@@ -133,22 +132,6 @@ export default class Patcher {
                 dst.fill(0, size, start);
             }
         }
-    }
-
-    /**
-     * Writes a DMA record to the output buffer.
-     * @param dst Writer instance containing the output buffer.
-     * @param index The index of the DMA record in the DMA table.
-     * @param record The DMA data to write to the table.
-     * @private
-     */
-    private _writeDmaRecord(dst: Writer, index: number, record: DmaRecord) {
-        dst.seek(this._conf.dmaOffset, "begin");
-        dst.seek(index * DMA_RECORD_SIZE);
-        dst.writeUint32(record.virtualStart);
-        dst.writeUint32(record.virtualEnd);
-        dst.writeUint32(record.physicalStart);
-        dst.writeUint32(record.physicalEnd);
     }
 
     /**

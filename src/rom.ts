@@ -1,4 +1,4 @@
-import {Reader, swap16} from "./util";
+import {Reader, swap16, Writer} from "./util";
 
 export const CRC_OFFSET = 0x10;
 export const DMA_RECORD_SIZE = 16;
@@ -120,6 +120,21 @@ export default class Rom extends Reader {
                 return record;
             }
         }
+    }
+
+    /**
+     * Writes a DMA record to Writer at the correct index.
+     * @param out Writer instance to write to.
+     * @param index The target index of the DMA record in the DMA table.
+     * @param record The DMA record to write.
+     */
+    public writeDmaRecord(out: Writer, index: number, record: DmaRecord) {
+        out.seek(this._dmaOffset, "begin");
+        out.seek(index * DMA_RECORD_SIZE);
+        out.writeUint32(record.virtualStart);
+        out.writeUint32(record.virtualEnd);
+        out.writeUint32(record.physicalStart);
+        out.writeUint32(record.physicalEnd);
     }
 
     /**

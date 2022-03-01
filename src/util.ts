@@ -1,3 +1,5 @@
+import {DMA_RECORD_SIZE, DmaRecord} from "./rom";
+
 /**
  * Byte swaps the endianness of a 32-bit integer.
  * @param value The 32-bit integer to swap.

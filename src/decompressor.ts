@@ -1,5 +1,5 @@
 import {Writer} from "./util";
-import Rom, {DECOMPRESSED_ROM_SIZE, DMA_INFO_RECORD_INDEX, DMA_RECORD_SIZE, DmaRecord} from "./rom";
+import Rom, {DECOMPRESSED_ROM_SIZE, DMA_INFO_RECORD_INDEX} from "./rom";
 import {N64Crc} from "./crc";
 
 /**
@@ -7,7 +7,7 @@ import {N64Crc} from "./crc";
  */
 export default class Decompressor {
     private readonly _buffer: ArrayBuffer;
-    private readonly _in: Rom;
+    private readonly _rom: Rom;
 
     /**
      * Constructs a Decompressor instance
@@ -15,23 +15,7 @@ export default class Decompressor {
      */
     public constructor(buffer: ArrayBuffer) {
         this._buffer = buffer;
-        this._in = new Rom(this._buffer);
-    }
-
-    /**
-     * Writes a DMA record to the output buffer.
-     * @param out A Writer instance to write the resulting DMA record to.
-     * @param index The target index in the output DMA table.
-     * @param record The DMA record to write.
-     * @private
-     */
-    private _writeDmaRecord(out: Writer, index: number, record: DmaRecord) {
-        out.seek(this._in.dmaOffset, "begin");
-        out.seek(index * DMA_RECORD_SIZE);
-        out.writeUint32(record.virtualStart);
-        out.writeUint32(record.virtualEnd);
-        out.writeUint32(record.physicalStart);
-        out.writeUint32(record.physicalEnd);
+        this._rom = new Rom(this._buffer);
     }
 
     /**
@@ -39,7 +23,7 @@ export default class Decompressor {
      * @returns ArrayBuffer containing the decompressed ROM.
      */
     public inflate() {
-        const info = this._in.readDmaRecord(DMA_INFO_RECORD_INDEX);
+        const info = this._rom.readDmaRecord(DMA_INFO_RECORD_INDEX);
 
         // Keep track of which files are already decompressed, so that we skip these in the compression step.
         const exclusions: number[] = [];
@@ -50,8 +34,8 @@ export default class Decompressor {
         out.writeBytes(this._buffer);
         out.fill(0, DECOMPRESSED_ROM_SIZE - info.virtualEnd, info.virtualEnd);
 
-        for (let i = DMA_INFO_RECORD_INDEX + 1; i < this._in.dmaCount; i++) {
-            const record = this._in.readDmaRecord(i);
+        for (let i = DMA_INFO_RECORD_INDEX + 1; i < this._rom.dmaCount; i++) {
+            const record = this._rom.readDmaRecord(i);
             const size = record.virtualEnd - record.virtualStart;
 
             // 0xFFFFFFFF are empty files, and should be skipped.
@@ -62,7 +46,7 @@ export default class Decompressor {
             // Check if the record is already decompressed, if not, decompress it.
             if (record.physicalEnd === 0) {
                 exclusions.push(i);
-                out.writeBytes(this._in.readBytes(size, record.physicalStart), record.virtualStart, size);
+                out.writeBytes(this._rom.readBytes(size, record.physicalStart), record.virtualStart, size);
             } else {
                 const source = new Uint8Array(this._buffer, record.physicalStart + 0x10);
                 const destination = new Uint8Array(outBuffer, record.virtualStart);
@@ -71,7 +55,7 @@ export default class Decompressor {
 
             record.physicalStart = record.virtualStart;
             record.physicalEnd = 0;
-            this._writeDmaRecord(out, i, record);
+            this._rom.writeDmaRecord(out, i, record);
         }
 
         new N64Crc(outBuffer).recalculate();
