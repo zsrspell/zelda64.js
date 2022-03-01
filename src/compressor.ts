@@ -1,4 +1,4 @@
-import {MessageType, OutMessageData, ProgressFn} from "./workers/compression";
+import {MessageType, OutMessageData, ProgressFn} from "./workers/compression.worker";
 
 /**
  * The Compressor class implements functionality for compressing Nintendo 64 Zelda ROMs.
@@ -10,7 +10,7 @@ export default class Compressor {
     private _onProgress?: ProgressFn;
 
     public constructor() {
-        this._worker = new Worker(new URL("./workers/compression.ts", import.meta.url));
+        this._worker = new Worker(new URL("./workers/compression.worker.ts", import.meta.url));
     }
 
     public deflate(buffer: ArrayBuffer, exclusions: number[] = []) {

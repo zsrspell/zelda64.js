@@ -10,6 +10,7 @@ module.exports = {
             name: "Zelda64",
             type: "umd",
         },
+        clean: true,
     },
     module: {
         rules: [
@@ -21,6 +22,6 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: [".ts", ".js"],
+        extensions: [".ts", "..."],
     }
 }
